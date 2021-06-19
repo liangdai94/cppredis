@@ -1,5 +1,6 @@
- #include "ae.h"
+#include "ae.h"
 #include "server.h"
+#include <utility> //pair
 
 int setnonblocking(int fd){
 	int old_option = fcntl(fd, F_GETFL);
@@ -12,15 +13,54 @@ FileEvent::FileEvent(int mask, fileProc rfileProc, fileProc wfileProc, clientDat
 			rfileProc(rfileProc), wfileProc(wfileProc),finalProc(finalProc),clientData(clientData){
 }
 
-LoopEvent::LoopEvent(int maxNum = 1024){
+LoopEvent::LoopEvent(int maxNum = 1024):evNum(maxNum){
 	ev = new epoll_event[maxNum];
 	epollfd =  epoll_create(5);
 
 }
 
+LoopEvent::~LoopEvent(){
+	
+	for(auto it_pos = events.begin();it_pos!=events.end();)
+	{
+		if( nullptr != it_pos->second )
+		{
+			//map.erase(it_pos++);
+			auto tmp = it_pos++;
+			aeDelFileEvent(it_pos->first);//迭代器失效，必须先加
+			it_pos = tmp;
+		}
+		else
+		{
+			it_pos++;
+		}
+	
+	}
+	delete [] ev;
+}
+
+//
 int LoopEvent::aeProcessEvents(){
+	Server & server = Server::getServer();
+	int ret = 0;
 	serverLog(LOG_NOTICE, "in looping.....");
-	sleep(2);
+	if(events.size() != 0){
+		int timeout = 100; //ms
+		ret = epoll_wait(epollfd, ev, evNum, timeout);
+		if(ret < 0){
+			serverLog(LOG_NOTICE, "epoll wait 0 fd.....");
+		}
+		for(int i = 0; i < ret; i++){
+			int sockfd = ev[i].data.fd;
+			if(sockfd == server.fd){
+				FileEvent * tmp = events[sockfd];
+				tmp->rfileProc(sockfd, nullptr, 0);
+			}
+			else{
+				fireFd.push(sockfd); //将事件压入就绪队列，等待线程池处理
+			}
+		}
+	}
 	return 0;
 }
 
