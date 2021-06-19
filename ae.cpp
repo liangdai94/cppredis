@@ -15,8 +15,8 @@ FileEvent::FileEvent(int mask, fileProc rfileProc, fileProc wfileProc, clientDat
 
 LoopEvent::LoopEvent(int maxNum = 1024):evNum(maxNum){
 	ev = new epoll_event[maxNum];
-	epollfd =  epoll_create(5);
 
+	epollfd =  epoll_create(5);
 }
 
 LoopEvent::~LoopEvent(){
@@ -46,13 +46,14 @@ int LoopEvent::aeProcessEvents(){
 	serverLog(LOG_NOTICE, "in looping.....");
 	if(events.size() != 0){
 		int timeout = 100; //ms
-		ret = epoll_wait(epollfd, ev, evNum, timeout);
+		ret = epoll_wait(epollfd, ev, evNum, -1);
 		if(ret < 0){
 			serverLog(LOG_NOTICE, "epoll wait 0 fd.....");
 		}
 		for(int i = 0; i < ret; i++){
 			int sockfd = ev[i].data.fd;
 			if(sockfd == server.fd){
+				serverLog(LOG_NOTICE, "get fd %d.....", sockfd);
 				FileEvent * tmp = events[sockfd];
 				tmp->rfileProc(sockfd, nullptr, 0);
 			}
@@ -95,7 +96,8 @@ void addfd(int epollfd, int fd, int mask, bool oneshot){
 		event.events |= EPOLLONESHOT;
 	}
 
-	epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
+	int ret = epoll_ctl(epollfd, EPOLL_CTL_ADD, fd, &event);
+
 	setnonblocking(fd);
 }
 

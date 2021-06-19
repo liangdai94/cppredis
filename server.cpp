@@ -113,7 +113,7 @@ void Server::initServer(){
 	}
 	
 	server.fd = anetTcpServer(server.port, server.bindaddr);
-	server.RegFileEvent(server.fd, EPOLLOUT, acceptHandler, nullptr, nullptr, nullptr);
+	server.RegFileEvent(server.fd, EPOLLIN, acceptHandler, nullptr, nullptr, nullptr);
 }
 
 void Server::loadServerConfig(char *filename){
