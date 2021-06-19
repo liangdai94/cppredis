@@ -38,3 +38,17 @@ int anetAccept(string & err, int sockfd, char *ip, int *port){
     if (port) *port = ntohs(client.sin_port);
     return fd;
 }
+
+
+int anetTcpNoDelay(string &err, int fd)
+{
+    int yes = 1;
+    if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == -1)
+    {
+    	err += strerror(errno);
+        return -1;
+    }
+    return 0;
+}
+
+

@@ -3,6 +3,7 @@
 #include "server.h"
 #include <cstring>
 #include <string>
+#include <memory>
 
 Server::Server(){
 	port = 9898;
@@ -50,10 +51,41 @@ static int anetTcpServer(int port, const char * ip){
 	return sockfd;
 }
 
-static void acceptHandler(int fd, void *privdata, int mask){
+//处理客户端发来的命令
+static void readQueryFromClient(int fd, clientDataBase *clientData, int mask){
+	int ret = 0;
+	Server & server = Server::getServer();
+	ret = read(fd, clientData->data(), clientData->bufLen());
+	if(ret == 0){
+		server.DelFileEvent(fd);
+		serverLog(LOG_DEBUG, "Client closed connection");
+		return ;	
+	}
+	else if(ret < 0){
+		if (errno == EAGAIN){
+			ret = 0;
+		}
+		else{
+			server.DelFileEvent(fd);
+			serverLog(LOG_DEBUG, "Client closed connection");
+			return ;
+		}
+	}
+	else{
+		
+	}
+
+	return;
+}
+
+
+//服务器接受连接
+static void acceptHandler(int fd, clientDataBase *privdata, int mask){
 	string err;
 	char ip[INET6_ADDRSTRLEN] = {0};
 	int port = 0;
+	Server & server = Server::getServer();
+	ClientData * client = new ClientData();
 	
 	int clientfd = anetAccept(err, fd, ip, &port);
 
@@ -63,7 +95,12 @@ static void acceptHandler(int fd, void *privdata, int mask){
 	}		
 	serverLog(LOG_DEBUG, "Accepted %s:%d", ip, port);
 
-	//
+	//将新收到的连接注册到主循环体
+	if(anetTcpNoDelay(err, fd) != 0){
+		serverLog(LOG_WARNING, "anetTcpNoDelay error: %s", err.c_str());
+		return;
+	}
+	server.RegFileEvent(clientfd, EPOLLIN | EPOLLOUT, readQueryFromClient, nullptr, client, nullptr);
 }
 
 void Server::initServer(){
@@ -76,7 +113,7 @@ void Server::initServer(){
 	}
 	
 	server.fd = anetTcpServer(server.port, server.bindaddr);
-	server.le->aeRegFileEvent(server.fd, EPOLLIN, acceptHandler, nullptr, nullptr, nullptr);
+	server.RegFileEvent(server.fd, EPOLLOUT, acceptHandler, nullptr, nullptr, nullptr);
 }
 
 void Server::loadServerConfig(char *filename){

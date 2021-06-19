@@ -15,6 +15,7 @@
 //#include "ae.h"
 #include <atomic>
 #include "anet.h"
+#include "ae.h"
 
 using namespace std;
 
@@ -61,6 +62,10 @@ public:
 	void loadServerConfig(char *filename);
 	bool isStop(){return stop;}
 	void start();
+	void DelFileEvent(int fd){le->aeDelFileEvent(fd);}
+	void RegFileEvent(int fd, int mask, fileProc rfileProc, fileProc wfileProc, clientDataBase *clientData, finalFileProc finalProc){
+		le->aeRegFileEvent(fd, mask, rfileProc, wfileProc, clientData, finalProc);
+	}
 };
 
 #endif
