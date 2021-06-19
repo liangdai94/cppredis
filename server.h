@@ -33,6 +33,7 @@ void serverLog(LogLevel level, const char *fmt, ...);
 
 class Server{
 public:
+	friend class LoopEvent;
 	static Server & getServer(){
 		static Server server;
 		return server;

@@ -49,7 +49,7 @@ private:
 };
 
 class FileEvent{
-private:
+public:
 	int mask;
 	fileProc rfileProc;
 	fileProc wfileProc;
@@ -71,6 +71,7 @@ private:
 
 	int epollfd;
 	epoll_event* ev;
+	int evNum;
 	queue<int> fireFd; //就绪队列
 
 public:
@@ -78,6 +79,7 @@ public:
 	bool aeRegFileEvent(int fd, int mask, fileProc rfileProc, fileProc wfileProc, clientDataBase *clientData, finalFileProc finalProc);
 	void aeDelFileEvent (int fd);
 	LoopEvent(int maxNum);
+	~LoopEvent();
 };
 
 void addfd(int epollfd, int fd, int mask, bool oneshot = false);
