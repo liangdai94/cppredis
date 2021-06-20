@@ -69,6 +69,7 @@ class TimeEvent{
 
 class LoopEvent{
 private:
+	friend class Server;
 	//list<FileEvent*> events;
 	unordered_map<int, FileEvent*> events;
 	int curEventNum;  //events.size()
@@ -76,7 +77,7 @@ private:
 	int epollfd;
 	epoll_event* ev;
 	int evNum;
-	threadsafe_queue<int> fireFd; //就绪队列
+	
 
 public:
 	int aeProcessEvents();
@@ -84,6 +85,9 @@ public:
 	void aeDelFileEvent (int fd);
 	LoopEvent(int maxNum);
 	~LoopEvent();
+	friend threadsafe_queue<int> & getFireFd();
+	friend void worker(void);
+	threadsafe_queue<int> fireFd; //就绪队列
 };
 
 void addfd(int epollfd, int fd, int mask, bool oneshot = false);

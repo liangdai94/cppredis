@@ -1,15 +1,18 @@
-#include "anet.h"
 #include "server.h"
 #include <cstring>
 #include <string>
 #include <memory>
+#include <thread>
+//#include <algorithm>  //min
 #include "ae.h"
+#include "anet.h"
 
 Server::Server(){
 	port = 9898;
 	loglevel = LogLevel::LOG_DEBUG;
 	maxNum = 65535;
 	stop = false;
+	threadNum = thread::hardware_concurrency() == 0 ? 4 : thread::hardware_concurrency();
 }
 
 Server::~Server(){
@@ -75,9 +78,11 @@ static void readQueryFromClient(int fd, clientDataBase *clientData, int mask){
 			}
 		}
 		else{
-			
+			//serverLog(LOG_DEBUG, "recv from %d, len %d", fd, ret);
 		}
 	}
+
+	
 
 	return;
 }
@@ -118,6 +123,10 @@ void Server::initServer(){
 	
 	server.fd = anetTcpServer(server.port, server.bindaddr);
 	server.RegFileEvent(server.fd, EPOLLIN, acceptHandler, nullptr, nullptr, nullptr);
+
+	//创建线程池
+	serverLog(LOG_DEBUG, "create pthread pool number: %d", threadNum);
+	threadPools::thread_pool::getThreadPool(threadNum, worker);
 }
 
 void Server::loadServerConfig(char *filename){
@@ -155,6 +164,25 @@ void serverLog(LogLevel level, const char *fmt, ...){
     if (server.logfile) fclose(fp);
 }
 
+//threadsafe_queue<int> & getFireFd(LoopEvent * le){return le->fireFd;}
 
+//线程池工作的线程函数
+void worker(void){
+	Server & server = Server::getServer();
+	int fd;
+	FileEvent * event = nullptr;
+
+	serverLog(LOG_DEBUG, "create pthread pool id: %u", this_thread::get_id());
+
+	//!server.isStop()
+	while(true){
+		//serverLog(LOG_DEBUG, "looping in pthread pool id: %u", this_thread::get_id());
+		server.le->fireFd.wait_and_pop(fd);
+		//serverLog(LOG_DEBUG, "pthread id: %u get fd %d   %d", this_thread::get_id(), fd, server.le->fireFd.empty());
+		//sleep(2);
+		event = server.getEventLoop()->events[fd];
+		event->rfileProc(fd, event->clientData, 0);//readQueryFromClient(int fd, clientDataBase *clientData, int mask)
+	}
+}
 
 

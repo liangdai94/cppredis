@@ -1,5 +1,5 @@
-#include "server.h"
 #include <cstdlib>
+#include "server.h"
 
 int main(int argc, char ** argv){
 	Server & server = Server::getServer();
@@ -9,7 +9,7 @@ int main(int argc, char ** argv){
 		serverLog(LOG_DEBUG, "loading config success.....");
 	}
 	else if (argc > 2){
-		fprintf(stderr,"Usage: ./erver [/path/to/redis.conf]\n");
+		fprintf(stderr,"Usage: ./server [/path/to/server.conf]\n");
 		exit(-1);
 	}
 	else{

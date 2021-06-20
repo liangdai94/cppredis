@@ -1,6 +1,5 @@
 #ifndef THREADSAFEQUEUE_H_
 #define THREADSAFEQUEUE_H_
-
 #include <queue>
 #include <condition_variable>
 #include <memory>	//shared_ptr
@@ -23,7 +22,7 @@ public:
 	}
 
 	void push(T new_value){
-		shared_ptr<T> data(make_shared<T>(move(new_value)));
+		shared_ptr<T> data(make_shared<T>(new_value));
 		lock_guard<mutex> lk(mut);
 		data_queue.push(data);
 		data_cond.notify_one();
