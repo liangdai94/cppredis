@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <queue>
+#include "threadSafequeue.h"
 
 using namespace std;
 //typedef void fileProc(struct aeEventLoop *eventLoop, int fd, void *clientData, MASKTYPE mask);
@@ -18,15 +19,18 @@ class clientDataBase{
 private:
 	char * buf;
 	int len;
+	int used;
 public:
 	virtual ~clientDataBase(){
 		delete [] buf;
 	}
-	clientDataBase(int len = 1024):len(len){
+	clientDataBase(int len = 1024):len(len),used(0){
 		buf = new char[1024];
 	}
 	char * data(){return buf;}
-	int bufLen(){return len;}
+	char * back(){return buf + used;}
+	int capacity(){return len;}
+	int size(){return used;}
 	clientDataBase & operator=(const clientDataBase &)=delete;
 	clientDataBase(const clientDataBase&) = delete;
 };
@@ -72,7 +76,7 @@ private:
 	int epollfd;
 	epoll_event* ev;
 	int evNum;
-	queue<int> fireFd; //就绪队列
+	threadsafe_queue<int> fireFd; //就绪队列
 
 public:
 	int aeProcessEvents();
@@ -85,3 +89,4 @@ public:
 void addfd(int epollfd, int fd, int mask, bool oneshot = false);
 
 #endif
+
