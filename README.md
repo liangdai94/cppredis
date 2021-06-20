@@ -7,7 +7,7 @@
 
 目前只只是初步完成数据库功能，性能情况需要进一步测试。线上效果图：
 
-![image-20210620215828562](C:\Users\dai\AppData\Roaming\Typora\typora-user-images\image-20210620215828562.png)
+![image-20210620215828562](https://github.com/liangdai94/cppredis/blob/main/res/%E6%95%88%E6%9E%9C%E5%9B%BE.bmp)
 
 只能说是初步能用。具体使用方式：
 
