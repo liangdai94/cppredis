@@ -1,9 +1,9 @@
-#include "ae.h"
 #include "anet.h"
 #include "server.h"
 #include <cstring>
 #include <string>
 #include <memory>
+#include "ae.h"
 
 Server::Server(){
 	port = 9898;
@@ -55,24 +55,28 @@ static int anetTcpServer(int port, const char * ip){
 static void readQueryFromClient(int fd, clientDataBase *clientData, int mask){
 	int ret = 0;
 	Server & server = Server::getServer();
-	ret = read(fd, clientData->data(), clientData->bufLen());
-	if(ret == 0){
-		server.DelFileEvent(fd);
-		serverLog(LOG_DEBUG, "Client closed connection");
-		return ;	
-	}
-	else if(ret < 0){
-		if (errno == EAGAIN){
-			ret = 0;
-		}
-		else{
+	//et模式需要一次读完所有的内容
+	while(true){
+		ret = read(fd, clientData->back(), clientData->capacity() - clientData->size());
+		if(ret == 0){
 			server.DelFileEvent(fd);
 			serverLog(LOG_DEBUG, "Client closed connection");
-			return ;
+			return ;	
 		}
-	}
-	else{
-		
+		else if(ret < 0){
+			if (errno == EAGAIN || errno == EWOULDBLOCK){
+				ret = 0;
+				break;
+			}
+			else{
+				server.DelFileEvent(fd);
+				serverLog(LOG_DEBUG, "Client closed connection");
+				return ;
+			}
+		}
+		else{
+			
+		}
 	}
 
 	return;

@@ -39,6 +39,7 @@ static int createTcpLink(int port, const char *ip){
 	sockaddr_in server;
 	socklen_t len = sizeof(server);
 	int ret = 0;
+	int yes;
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(port);
@@ -53,10 +54,17 @@ static int createTcpLink(int port, const char *ip){
 	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
 	ret = connect(sockfd, (struct sockaddr *)&server, len);
+
 	if(ret < 0){
 		fprintf(stderr, "create connect error\n");
 		exit(1);
 	}
+
+	//关闭nagle算法，避免粘包
+	if (setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &yes, sizeof(yes)) == -1)
+    {
+        fprintf(stderr, "close nagle error\n");
+    }
 
 	return sockfd;
 }
@@ -67,7 +75,7 @@ int main(int argc, char * * argv){
 	char ip[INET6_ADDRSTRLEN] = {0};
 	int ret;
 	if(argc <= 2){
-		fprintf(stderr, "usage: redis-cli [-h host] [-p port] cmd arg1 arg2 arg3 ... argN\n");
+		fprintf(stderr, "usage: cli_main [-h host] [-p port] cmd arg1 arg2 arg3 ... argN\n");
 		exit(1);
 	}
 	while ((ch = getopt(argc, argv, "h:p:")) != -1){
@@ -89,7 +97,7 @@ int main(int argc, char * * argv){
 	Command & cmd = Command::getComTable();
 	int fd = createTcpLink(port, ip);
 	while(true){
-		ret = send(fd, "1111111", strlen("1111111"));
+		ret = write(fd, "1111111", strlen("1111111"));
 		printf("send %d\n", ret);
 		sleep(1);
 	}
