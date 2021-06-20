@@ -1,6 +1,8 @@
 #include "ae.h"
-#include "server.h"
 #include <utility> //pair
+#include <condition_variable>
+#include <mutex>
+#include "server.h"
 
 int setnonblocking(int fd){
 	int old_option = fcntl(fd, F_GETFL);
@@ -58,7 +60,9 @@ int LoopEvent::aeProcessEvents(){
 				tmp->rfileProc(sockfd, nullptr, 0);
 			}
 			else{
+				//serverLog(LOG_NOTICE, "push fd %d.....", sockfd);
 				fireFd.push(sockfd); //将事件压入就绪队列，等待线程池处理
+				//fireFd.test(sockfd);
 			}
 		}
 	}
@@ -100,5 +104,3 @@ void addfd(int epollfd, int fd, int mask, bool oneshot){
 
 	setnonblocking(fd);
 }
-
-

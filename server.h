@@ -2,7 +2,6 @@
 #define SERVER_H_
 
 #include <arpa/inet.h>
-#include <list>
 #include <stdarg.h>
 #include <ctime>
 #include <cstdio>
@@ -12,15 +11,20 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <cstdlib>
-//#include "ae.h"
 #include <atomic>
+#include <list>
+#include <unordered_map>
+#include <vector>
+#include <array>
 #include "anet.h"
+#include "threadPool.h"
+#include "threadSafequeue.h"
 #include "ae.h"
 
 using namespace std;
 
 static int anetTcpServer(int port, const char * ip);
-class LoopEvent;
+void worker(void);
 
 enum LogLevel{
 	 LOG_DEBUG, 
@@ -42,6 +46,7 @@ public:
 	~Server();
 	Server(const Server&) = delete;
 	Server& operator=(const Server &) = delete;
+	using DATABASE = unordered_map<string, string>;
 
 private:
 	int port;
@@ -54,6 +59,10 @@ private:
 	LoopEvent* le;
 
 	bool stop;
+	int threadNum;
+
+	//using DATABASE = unordered_map<string, vector<char>>;
+	array<DATABASE, 8> databases;
 
 	Server();
 
@@ -67,6 +76,9 @@ public:
 	void RegFileEvent(int fd, int mask, fileProc rfileProc, fileProc wfileProc, clientDataBase *clientData, finalFileProc finalProc){
 		le->aeRegFileEvent(fd, mask, rfileProc, wfileProc, clientData, finalProc);
 	}
+	LoopEvent* getEventLoop(){return le;}
+	DATABASE & getDatabase(int n){return databases[n];}
+	friend void worker(void);
 };
 
 #endif
