@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <unordered_set>
 #include <string>
+#include <iostream>
 
 using namespace std;
 
@@ -74,6 +75,7 @@ int main(int argc, char * * argv){
 	int ch;
 	char ip[INET6_ADDRSTRLEN] = {0};
 	int ret;
+	char buf[128] = {0};
 	if(argc <= 2){
 		fprintf(stderr, "usage: cli_main [-h host] [-p port] cmd arg1 arg2 arg3 ... argN\n");
 		exit(1);
@@ -97,8 +99,12 @@ int main(int argc, char * * argv){
 	Command & cmd = Command::getComTable();
 	int fd = createTcpLink(port, ip);
 	while(true){
-		ret = write(fd, "1111111", strlen("1111111"));
-		printf("send %d\n", ret);
-		sleep(1);
+		printf("client> ");
+		memset(buf, 0, sizeof(buf));
+		cin.getline(buf, sizeof(buf));
+		ret = write(fd, buf, strlen(buf));
+		memset(buf, 0, sizeof(buf));
+		ret = read(fd, buf, sizeof(buf));
+		printf("client> %s\n", buf);
 	}
 }

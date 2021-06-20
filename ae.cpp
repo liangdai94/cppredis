@@ -60,7 +60,7 @@ int LoopEvent::aeProcessEvents(){
 				tmp->rfileProc(sockfd, nullptr, 0);
 			}
 			else{
-				serverLog(LOG_NOTICE, "push ddddddddd  fd %d.....", sockfd);
+				//serverLog(LOG_NOTICE, "push fd %d.....", sockfd);
 				fireFd.push(sockfd); //将事件压入就绪队列，等待线程池处理
 				//fireFd.test(sockfd);
 			}

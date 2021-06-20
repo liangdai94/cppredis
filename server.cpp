@@ -3,9 +3,16 @@
 #include <string>
 #include <memory>
 #include <thread>
+#include <vector>
+#include <string>
 //#include <algorithm>  //min
 #include "ae.h"
 #include "anet.h"
+#include "command.h"
+
+#include <iostream>
+
+using namespace std;
 
 Server::Server(){
 	port = 9898;
@@ -58,6 +65,9 @@ static int anetTcpServer(int port, const char * ip){
 static void readQueryFromClient(int fd, clientDataBase *clientData, int mask){
 	int ret = 0;
 	Server & server = Server::getServer();
+	vector<string> argv;
+	bool flag = false;
+	int len = 0;
 	//et模式需要一次读完所有的内容
 	while(true){
 		ret = read(fd, clientData->back(), clientData->capacity() - clientData->size());
@@ -79,11 +89,29 @@ static void readQueryFromClient(int fd, clientDataBase *clientData, int mask){
 		}
 		else{
 			//serverLog(LOG_DEBUG, "recv from %d, len %d", fd, ret);
+			len += ret;
+			clientData->addSize(ret);
 		}
 	}
 
+	if(len == 0)
+		return;
 	
+	commandProc func = commandTable::lookupCommand(argv, clientData);
 
+	if(func == nullptr){
+		write(fd, "error use", strlen("error use"));
+		return;
+	}
+	else{
+		flag = func(argv, clientData);
+	}
+
+	ret = 0;
+	while(flag == true && ret < argv[0].size()){
+		ret = write(fd, argv[0].data() + ret, argv[0].size() - ret);
+	}
+	
 	return;
 }
 
@@ -114,6 +142,7 @@ static void acceptHandler(int fd, clientDataBase *privdata, int mask){
 
 void Server::initServer(){
 	Server & server = Server::getServer();
+	commandTable::getCommandTable();
 
 	server.le = new LoopEvent(server.maxNum);
 

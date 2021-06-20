@@ -1,16 +1,18 @@
 #ifndef AE_H_
 #define AE_H_
 
-#include <list>
 #include <unistd.h>
-#include <unordered_map>
+#include <cstring>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <queue>
+#include <unordered_map>
+#include <list>
 #include "threadSafequeue.h"
+#include "command.h"
 
 using namespace std;
 //typedef void fileProc(struct aeEventLoop *eventLoop, int fd, void *clientData, MASKTYPE mask);
@@ -20,17 +22,21 @@ private:
 	char * buf;
 	int len;
 	int used;
+	int dataNo; //数据库编号默认0
 public:
+	friend class commandTable;
 	virtual ~clientDataBase(){
 		delete [] buf;
 	}
-	clientDataBase(int len = 1024):len(len),used(0){
+	clientDataBase(int len = 1024):len(len),used(0),dataNo(0){
 		buf = new char[1024];
 	}
 	char * data(){return buf;}
 	char * back(){return buf + used;}
 	int capacity(){return len;}
 	int size(){return used;}
+	void addSize(int cnt){used += cnt;}
+	void clear(){used = 0; memset(buf, 0, len);}
 	clientDataBase & operator=(const clientDataBase &)=delete;
 	clientDataBase(const clientDataBase&) = delete;
 };
@@ -78,7 +84,7 @@ private:
 	epoll_event* ev;
 	int evNum;
 	
-
+	threadsafe_queue<int> fireFd; //就绪队列
 public:
 	int aeProcessEvents();
 	bool aeRegFileEvent(int fd, int mask, fileProc rfileProc, fileProc wfileProc, clientDataBase *clientData, finalFileProc finalProc);
@@ -87,7 +93,7 @@ public:
 	~LoopEvent();
 	friend threadsafe_queue<int> & getFireFd();
 	friend void worker(void);
-	threadsafe_queue<int> fireFd; //就绪队列
+	
 };
 
 void addfd(int epollfd, int fd, int mask, bool oneshot = false);

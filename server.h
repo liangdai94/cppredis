@@ -2,7 +2,6 @@
 #define SERVER_H_
 
 #include <arpa/inet.h>
-#include <list>
 #include <stdarg.h>
 #include <ctime>
 #include <cstdio>
@@ -13,6 +12,10 @@
 #include <sys/epoll.h>
 #include <cstdlib>
 #include <atomic>
+#include <list>
+#include <unordered_map>
+#include <vector>
+#include <array>
 #include "anet.h"
 #include "threadPool.h"
 #include "threadSafequeue.h"
@@ -43,6 +46,7 @@ public:
 	~Server();
 	Server(const Server&) = delete;
 	Server& operator=(const Server &) = delete;
+	using DATABASE = unordered_map<string, string>;
 
 private:
 	int port;
@@ -57,6 +61,9 @@ private:
 	bool stop;
 	int threadNum;
 
+	//using DATABASE = unordered_map<string, vector<char>>;
+	array<DATABASE, 8> databases;
+
 	Server();
 
 public:
@@ -70,7 +77,7 @@ public:
 		le->aeRegFileEvent(fd, mask, rfileProc, wfileProc, clientData, finalProc);
 	}
 	LoopEvent* getEventLoop(){return le;}
-
+	DATABASE & getDatabase(int n){return databases[n];}
 	friend void worker(void);
 };
 
