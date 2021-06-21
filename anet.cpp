@@ -7,13 +7,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
-#include <netdb.h>
 #include <errno.h>
-#include <stdarg.h>
 #include <stdio.h>
-#include <string>
-
-using namespace std;
 
 int anetAccept(string & err, int sockfd, char *ip, int *port){
 	sockaddr_in client;

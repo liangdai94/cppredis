@@ -14,7 +14,7 @@
 #include "threadSafequeue.h"
 #include "command.h"
 
-using namespace std;
+//using namespace std;
 //typedef void fileProc(struct aeEventLoop *eventLoop, int fd, void *clientData, MASKTYPE mask);
 
 class clientDataBase{

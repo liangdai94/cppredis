@@ -4,8 +4,8 @@
 #include <condition_variable>
 #include <memory>	//shared_ptr
 #include <mutex>  // std::mutex, std::lock_guard
-
-using namespace std;
+//
+using namespace std;using std::string;using std::queue;using std::shared_ptr;using std::lock_guard;using std::unique_lock;
 
 template<typename T>
 class threadsafe_queue{

@@ -21,7 +21,10 @@
 #include "threadSafequeue.h"
 #include "ae.h"
 
-using namespace std;
+//using namespace std;
+using std::array;
+using std::unordered_map;
+using std::string;
 
 static int anetTcpServer(int port, const char * ip);
 void worker(void);
