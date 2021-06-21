@@ -17,7 +17,7 @@ using worker = void(*)(void);
 //暂时只支持定量的线程数量，后期尝试动态增加减少线程数量
 class thread_pool{
 private:
-	atomic_bool done;
+	//atomic_bool done;
 	vector<thread> pool;
 	//worker work;
 	
@@ -41,6 +41,6 @@ public:
 	}
 };
 
-}
+}//namespace threadPools
 
 #endif

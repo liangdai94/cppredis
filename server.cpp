@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-using namespace std;
+//using namespace std;
 
 Server::Server(){
 	port = 9898;
