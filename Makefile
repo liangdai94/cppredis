@@ -1,24 +1,31 @@
 #一个简单的makefile
-SOURCESALL = $(wildcard *.cpp)
-HEADS = $(wildcard *.h)
-OBJECTSALL = $(patsubst %.cpp,%.o,$(SOURCESALL))
-CLIENT = cli_main.o
+HEADDIR = ./include
+SRCDIR = ./src
+BINDIR = ./bin
+OBJDIR = ./obj
+
+SOURCESALL = $(wildcard $(SRCDIR)/*.cpp)
+SOURCENODIR = $(notdir $(SOURCESALL))
+HEADS = $(wildcard $(HEADDIR)/*.h)
+
+OBJECTSALL = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SOURCENODIR))
+CLIENT = $(OBJDIR)/cli_main.o
 OBJECTS = $(filter-out $(CLIENT),$(OBJECTSALL))
 LIBS = -pthread
-FLAGS = -g
+FLAGS = -g -I$(HEADDIR)
 
 CC = g++
 
 all: server client
 
 server:$(OBJECTS)
-	$(CC) $^ -o $@ $(LIBS) $(FLAGS)
+	$(CC) $^ -o $(BINDIR)/$@ $(LIBS) $(FLAGS)
 
-$(OBJECTS):%.o:%.cpp
+$(OBJECTS):$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CC) -c $< -o $@ $(FLAGS)
 
-client:cli_main.o
-	$(CC) $< -o $@ $(FLAGS)
+client:$(SRCDIR)/cli_main.cpp
+	$(CC) $< -o $(BINDIR)/$@ $(FLAGS)
 
 .PHONY:clean 
 clean:
