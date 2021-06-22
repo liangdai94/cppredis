@@ -1,3 +1,7 @@
+//Copyright 2021 Dailiang
+//License GPL 3.0
+//Author Dailiang
+
 #include "ae.h"
 #include <utility> //pair
 #include <condition_variable>

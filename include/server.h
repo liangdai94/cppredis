@@ -1,3 +1,7 @@
+//Copyright 2021 Dailiang
+//License GPL 3.0
+//Author Dailiang
+
 #ifndef SERVER_H_
 #define SERVER_H_
 

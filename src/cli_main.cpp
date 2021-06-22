@@ -1,3 +1,7 @@
+//Copyright 2021 Dailiang
+//License GPL 3.0
+//Author Dailiang
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
