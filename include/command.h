@@ -1,3 +1,7 @@
+//Copyright 2021 Dailiang
+//License GPL 3.0
+//Author Dailiang
+
 #ifndef COMMAND_H_
 #define COMMAND_H_
 

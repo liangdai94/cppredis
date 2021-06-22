@@ -1,3 +1,7 @@
+//Copyright 2021 Dailiang
+//License GPL 3.0
+//Author Dailiang
+
 #ifndef PHTREAD_POOL_H_
 #define PHTREAD_POOL_H_
 
