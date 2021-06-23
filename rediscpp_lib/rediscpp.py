@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
-""" rediscpp.py - A client for the Redis daemon.
+""" rediscpp.py - A client for the Rediscpp daemon.
+	未测试
 """
 
 __author__ = "Dailiang"
