@@ -12,7 +12,7 @@ OBJECTSALL = $(patsubst %.cpp, $(OBJDIR)/%.o, $(SOURCENODIR))
 CLIENT = $(OBJDIR)/cli_main.o
 OBJECTS = $(filter-out $(CLIENT),$(OBJECTSALL))
 LIBS = -pthread
-FLAGS = -g -I$(HEADDIR)
+FLAGS = -g -I$(HEADDIR) -std=c++11
 
 CC = g++
 
