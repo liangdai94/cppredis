@@ -31,6 +31,7 @@ long long Timer::generateId(){
 
 long long TimerManager::addTimer(int reapeatedTimes, long long interval, const TimerCallback & timerCallback){
 	//Timer * pTimer = new Timer(reapeatedTimes, interval, timerCallback);
+	lock_guard<mutex> lk(s_mutex);
 	shared_ptr<Timer> pTimer = make_shared<Timer>(reapeatedTimes, interval, timerCallback);
 	m_listTimers.insert(pTimer);
 	return pTimer->getId();
@@ -38,7 +39,7 @@ long long TimerManager::addTimer(int reapeatedTimes, long long interval, const T
 
 bool TimerManager::removeTimer(long long timerId){
 	//Timer * deleteTimer;
-	
+	lock_guard<mutex> lk(s_mutex);
 	for(auto iter = m_listTimers.begin(); iter != m_listTimers.end(); iter++){
 		if(timerId == (*iter)->getId()){
 			this->m_listTimers.erase(iter);
@@ -51,7 +52,7 @@ bool TimerManager::removeTimer(long long timerId){
 
 void TimerManager::checkAndHandleTimers(){
 	//Timer * timer;
-
+	lock_guard<mutex> lk(s_mutex);
 	for(auto iter = m_listTimers.begin(); iter != m_listTimers.end();){
 		if((*iter)->isExpired()){
 			(*iter)->run();
