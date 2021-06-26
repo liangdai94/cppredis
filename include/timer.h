@@ -15,6 +15,8 @@
 using TimerCallback = std::function<void()>;
 using std::shared_ptr;
 using std::make_shared;
+using std::lock_guard;
+using std::mutex;
 
 class Timer{
 public:
@@ -52,6 +54,14 @@ public:
 	TimerManager() = default;
 	~TimerManager() = default;
 
+	TimerManager(const TimerManager&) = delete;
+	TimerManager& operator=(const TimerManager &) = delete;
+
+	static TimerManager & getTimerManager(){
+		static TimerManager timerManager;
+		return timerManager;
+	}
+
 	/*添加定时器
 	*@param in 1 定时器重复次数
 	*@param in 2 触发间隔
@@ -70,6 +80,7 @@ public:
 
 private:
 	std::set<shared_ptr<Timer>, Timercompare> m_listTimers;
+	std::mutex s_mutex; //修改TimerManager时必须上锁
 };
 
 
