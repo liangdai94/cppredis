@@ -3,9 +3,12 @@
 //Author Dailiang
 
 #include <cstdlib>
+#include <signal.h>
 #include "server.h"
 
 int main(int argc, char ** argv){
+
+	signal(SIGPIPE, SIG_IGN);
 	Server & server = Server::getServer();
 
 	if(argc == 2){
