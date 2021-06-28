@@ -2,88 +2,84 @@
 //License GPL 3.0
 //Author Dailiang
 
-//未测试
+//有点小问题
 
 //client.go - A client for the Rediscpp daemon.
 
-package Rediscpp
+package rediscpp
 
 import(
-	"fmt"
-	"net"
-	"bytes"
-	"io/ioutil" //io 工具包	
+    "fmt"
+    "net"
+    "strconv"
+    "os"
+    "bytes"
+    "io/ioutil" //io 工具包
 )
-
-type redisError struct {  
-    Err    error
-}
-
-func (e *redisError) Error() string {  
-
-    return e.Err.Error()
-}
 
 //禁止直接生成rediscpp
 type rediscpp struct{
-	var server string
-	var port  int
-	var addr Addr
-	var conn *TCPConn
+    server string
+    port  int
+    conn net.Conn
 }
 
 //构造函数
-func New(server string, port int) (rediscpp, error) {  
-    c := rediscpp {server, port}
+func Newcpp(server string, port int) (rediscpp, error) {
+    //c := rediscpp {server, port, net.Conn{}}
+    var c rediscpp
+    c.server = server
+    c.port = port
 
-    c.addr, err := net.ResolveTCPAddr("tcp4", c.server)
-	if err != nil{
-		fmt.Println(err)
-		return
-	}
+    conn, err := net.Dial("tcp", server + ":" + strconv.Itoa(port))
+    c.conn = conn
+    
+    if err != nil{
+        fmt.Println(err)
+    }
 
-	//func DialTCP(net string, laddr, raddr *TCPAddr) (*TCPConn, error) 
-	c.conn, err := net.DialTCP("tcp4", nil, c.addr)
-	if err != nil{
-		fmt.Println(err)
-		return
-	}
-	
-    return c
+    return c, err
 }
 
-//func (c rediscpp)connect(){
-//	addr, err := net.ResolveTCPAddr("tcp4", c.server)
-//	if err != nil{
-//	}
-//	
-//}
-
-//func disconnect() bool{
-//	defer func
-//}
-
-//func write(buffer bytes.Buffer){
-//}
-
-//func read(){
-//}
-
-func Get(key string)([]byte){
-	//var buffer bytes.Buffer
-	buffer := bytes.NewBufferString("get ") 
-	b.WriteString(key)
-	_, err = conn.WriteString(buffer)
-	//func ReadAll(r io.Reader) ([]byte, error)
-	response, _ := ioutil.ReadAll(conn)
-	return response
+func (c rediscpp)Get(key string)([]byte){
+        //var buffer bytes.Buffer
+        buffer := bytes.NewBufferString("get ")
+        _, _ = buffer.WriteString(key) //暂时忽略返回
+        _, _ = c.conn.Write(buffer.Bytes())
+        //func ReadAll(r io.Reader) ([]byte, error)
+        response, _ := ioutil.ReadAll(c.conn)
+        return response
 }
 
-func Set(key string, value string){
-	buffer := bytes.NewBufferString("set ") 
-	b.WriteString(key + value)
-	_, err = conn.WriteString(buffer)
-	//func ReadAll(r io.Reader) ([]byte, error)
-	response, _ := ioutil.ReadAll(conn)
-	return response
+func (c rediscpp)Set(key string, value string)([]byte){
+        buffer := bytes.NewBufferString("set ")
+        _, _ = buffer.WriteString(key + " " + value)
+        _, _ = c.conn.Write(buffer.Bytes())
+        //func ReadAll(r io.Reader) ([]byte, error)
+        response, _ := ioutil.ReadAll(c.conn)
+        return response
+}
+
+/*
+func main(){
+    ip, port := "127.0.0.1", 9898
+    
+    client, err := Newcpp(ip, port)
+    
+     ClientHandleError(err, "error")
+    
+    var res []byte
+    
+    res = client.Set("hello", " world")
+    fmt.Println(res)
+    res = client.Get("hello")
+    fmt.Println(res)
+}
+*/
+
+func ClientHandleError(err error, what string){
+    if err != nil {
+        fmt.Println(err, what)
+        os.Exit(1)
+    }
 }
