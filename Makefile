@@ -16,6 +16,11 @@ FLAGS = -g -I$(HEADDIR) -std=c++11
 
 CC = g++
 
+exist = $(shell if [ -f $(OBJDIR) ]; then echo "exist"; else echo "notexist"; fi;)
+ifeq (exist, "exist")
+$(shell mkdir $(OBJDIR))
+endif
+
 all: server client
 
 server:$(OBJECTS)
