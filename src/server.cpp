@@ -163,6 +163,10 @@ void Server::initServer(){
 }
 
 void Server::loadServerConfig(char *filename){
+	Server & server = Server::getServer();
+
+	memset(server.bindaddr, 0, INET6_ADDRSTRLEN);
+	server.logfile = nullptr;
 }
 
 void Server::start(){
